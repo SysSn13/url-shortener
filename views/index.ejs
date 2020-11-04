@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('partials/head');%>
+
+</head>
+
+<body>
+
+    <header>
+        <%- include('partials/header'); %>
+    </header>
+    <main>
+        <br><br>
+        <div class="container ">
+            <form id="url-form">
+                <div class="form-group row">
+                    <div class="col-sm-8 col-8 text-center pt-5">
+                        <input class="form-control form-control-lg" type="text" name="url"
+                            placeholder="Shorten your link" id="urlToShort">
+                    </div>
+                    <div class="col-sm-4 col-8 pt-5">
+                        <button type="submit" class="btn btn-primary">Shorten</button>
+
+                    </div>
+                </div>
+
+            </form>
+
+        </div>
+
+
+
+    </main>
+
+    <footer>
+        <%- include('partials/footer'); %>
+    </footer>
+
+    <%- include('partials/scripts') %>
+
+    <script>
+        var form = document.getElementById('url-form');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var data = {};
+            var formData = new FormData(form);
+            for (var [key, value] of formData.entries()) {
+                data[key] = value;
+                console.log(key, value);
+            }
+            fetch("/api/shorten-url", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then((response) => {
+                if (!response.ok) {
+                    response.text().then(text => {
+                        alert(text)
+                    });
+                    throw Error(response.statusText);
+                }
+                return response;
+            }).then((response) => {
+                response.json().then((json) => alert(json));
+            }).catch((error) => {
+                console.log(error);
+            });
+        });
+
+    </script>
+</body>
+
+</html>
