@@ -1,5 +1,5 @@
 {
-  "name": "url-shortner",
+  "name": "url-shortener",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,17 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sudesh1122/url-shortner.git"
+    "url": "git+https://github.com/sudesh1122/url-shortener.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/sudesh1122/url-shortner/issues"
+    "url": "https://github.com/sudesh1122/url-shortener/issues"
   },
-  "homepage": "https://github.com/sudesh1122/url-shortner#readme",
+  "homepage": "https://github.com/sudesh1122/url-shortener#readme",
   "dependencies": {
-    "body-parser": "^1.19.0",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
     "joi": "^17.3.0",

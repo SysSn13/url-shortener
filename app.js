@@ -5,6 +5,7 @@ const app = express();
 const apiRoutes = require('./routes/apiRoutes');
 const viewRoutes = require('./routes/viewRoutes');
 const databaseController = require('./controllers/databaseController');
+
 // Parse URL-encoded bodies (as sent by HTML forms)
 app.use(express.urlencoded());
 

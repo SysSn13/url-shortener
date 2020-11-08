@@ -102,7 +102,7 @@ function checkAndCreateTable() {
 // function to insert a url to the urls table
 function insertUrl(url) {
     var query = `
-        insert into urls values (default,'${url}');
+        insert into urls values (default,'${url}') RETURNING ID;
     `;
     pool.connect((err, client, done) => {
         if (err)
@@ -116,6 +116,7 @@ function insertUrl(url) {
                         console.error('Error committing transaction', err.stack)
                     } else{
                         console.log("url inserted!");
+                        console.log(res.rows);
                     }
                     done();
                 });
