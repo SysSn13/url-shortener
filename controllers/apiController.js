@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const databaseController = require('./databaseController');
 module.exports.shortenUrl = (req, res) => {
     const { error } = validateUrlForm(req.body);
     if (error) {
@@ -7,12 +8,13 @@ module.exports.shortenUrl = (req, res) => {
         return;
     }
     console.log(req.body.url);
-    res.status(200).json("given url is valid");
+    databaseController.insertUrl(req,res);
+    // res.status(200).json("given url is valid");
 }
 
 function validateUrlForm(body) {
     const schema = Joi.object({
-        url: Joi.string().pattern(/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/).required()
+        url: Joi.string().pattern(/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/).required().max(1000)
     });
     return schema.validate(body);
-};
+};  

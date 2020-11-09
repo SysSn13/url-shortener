@@ -27,6 +27,19 @@
                 </div>
 
             </form>
+            <br><br>
+            <table class="table table-hover" id="urlsTable" hidden>
+                <thead>
+                    <tr class="table-active">
+                        <th scope="col">URL</th>
+                        <th scope="col">Shortened URL</th>
+
+                    </tr>
+                </thead>
+                <tbody id="urlsTableBody">
+
+                </tbody>
+            </table>
 
         </div>
 
@@ -50,6 +63,7 @@
                 data[key] = value;
                 console.log(key, value);
             }
+            var original_url = data['url'];
             fetch("/api/shorten-url", {
                 method: 'POST',
                 headers: {
@@ -65,11 +79,25 @@
                 }
                 return response;
             }).then((response) => {
-                response.json().then((json) => alert(json));
+                response.json().then((json) => insertTableRow(original_url,json));
+                document.getElementById("url-form").reset();
+
             }).catch((error) => {
                 console.log(error);
             });
         });
+
+        function insertTableRow(url,shortenedUrl){
+            var tableBody = document.getElementById('urlsTableBody');
+            var row_html = `
+            <tr class="table-light">
+                <td>${url}</td>
+                <td>${window.location.href}${shortenedUrl}</td>
+            </tr>
+            `;
+            tableBody.insertAdjacentHTML("afterbegin",row_html);
+            document.getElementById("urlsTable").removeAttribute("hidden");
+        }
 
     </script>
 </body>

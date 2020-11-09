@@ -1,5 +1,7 @@
 const { Pool } = require('pg');
 
+const base62Controller = require('./base62Controller');
+
 // connectionString format -> "postgres://*USERNAME*:*PASSWORD*@*HOST*:*PORT*/*DATABASE*"
 var connectionString = process.env.DATABASE_URL || "postgres://postgres:dbpass@localhost:5432/urlsdb";
 
@@ -100,7 +102,8 @@ function checkAndCreateTable() {
 }
 
 // function to insert a url to the urls table
-function insertUrl(url) {
+function insertUrl(req,req_res) {
+    var url = req.body.url;
     var query = `
         insert into urls values (default,'${url}') RETURNING ID;
     `;
@@ -115,8 +118,8 @@ function insertUrl(url) {
                     if (err) {
                         console.error('Error committing transaction', err.stack)
                     } else{
-                        console.log("url inserted!");
-                        console.log(res.rows);
+                        // console.log("url inserted!");
+                        req_res.json(base62Controller.encode(res.rows[0].id));
                     }
                     done();
                 });
@@ -126,7 +129,8 @@ function insertUrl(url) {
 }
 
 // function to get the url by ID
-function getUrlByID(ID) {
+function redirecthandler(req,req_res) {
+    var ID = base62Controller.decode(req.params.code);
     var query = `
         select URL from urls where ID=${ID};
     `;
@@ -138,10 +142,12 @@ function getUrlByID(ID) {
                 throw error;
             var urlExists = (res.rows.length==1);
             if(urlExists){
-                console.log(res.rows[0]);
+                // console.log(res.rows[0]);
+                req_res.redirect(res.rows[0].url);
             }
             else{
                 console.log("url with given ID not found!");
+                req_res.status(404).render('404page');
             }
         });
     });
@@ -150,4 +156,4 @@ function getUrlByID(ID) {
 // exports
 module.exports.checkAndCreateTable = checkAndCreateTable;
 module.exports.insertUrl = insertUrl;
-module.exports.getUrlByID = getUrlByID;
+module.exports.redirecthandler = redirecthandler;
