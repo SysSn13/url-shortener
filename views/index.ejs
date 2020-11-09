@@ -55,16 +55,18 @@
 
     <script>
 
-        if (localStorage["urls"] === null) {
-            localStorage.setItem("urls", "[]");
-        }
+
 
         // load previously shortened urls
-        document.addEventListener('readystatechange', () => {
-            if (document.readyState == 'complete') {
-                loadShortenedLinks();
-            };
-        });
+
+        try{
+            if (!localStorage["urls"]) {
+                localStorage['urls'] = "[]";
+            }
+        }
+        finally{
+            loadShortenedLinks();
+        }
 
         var form = document.getElementById('url-form');
 
@@ -97,6 +99,7 @@
             }).then((response) => {
                 response.json().then((json) => setTimeout(() => {
                     insertTableRow(original_url, json);
+                    saveUrlInLocalStorage(original_url, json);
                     document.getElementById("url-form").reset();
                 }, 300));
             }).catch((error) => {
@@ -117,7 +120,6 @@
             `;
             tableBody.insertAdjacentHTML("afterbegin", row_html);
             document.getElementById("urlsTable").removeAttribute("hidden");
-            saveUrlInLocalStorage(url, shortenedUrl);
         }
 
         // function to activate/deactivate spinner
@@ -150,7 +152,6 @@
 
         // function to load local urls
         function loadShortenedLinks() {
-
             // console.log(localStorage["urls"]);
             document.getElementById("urlsTableBody").innerHTML = "";
             var urls = JSON.parse(localStorage["urls"]);
