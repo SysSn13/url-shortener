@@ -3,11 +3,9 @@
 
 <head>
     <%- include('partials/head');%>
-
 </head>
 
 <body>
-
     <header>
         <%- include('partials/header'); %>
     </header>
@@ -21,29 +19,31 @@
                             placeholder="Shorten your link" id="urlToShort">
                     </div>
                     <div class="col-sm-4 col-8 pt-5">
-                        <button type="submit" class="btn btn-primary">Shorten</button>
+                        <button type="submit" id="submit-button" class="btn btn-primary"
+                            style="margin-top:15px;">Shorten</button>
 
                     </div>
                 </div>
 
             </form>
             <br><br>
-            <table class="table table-hover" id="urlsTable" hidden>
-                <thead>
-                    <tr class="table-active">
-                        <th scope="col">URL</th>
-                        <th scope="col">Shortened URL</th>
+            <div class="table-responsive-sm">
 
-                    </tr>
-                </thead>
-                <tbody id="urlsTableBody">
+                <table class="table table-hover" id="urlsTable" hidden>
+                    <thead>
+                        <tr class="table-active">
+                            <th scope="col">URL</th>
+                            <th scope="col">Shortened URL</th>
 
-                </tbody>
-            </table>
+                        </tr>
+                    </thead>
+                    <tbody id="urlsTableBody">
+
+                    </tbody>
+                </table>
+            </div>
 
         </div>
-
-
 
     </main>
 
@@ -54,16 +54,32 @@
     <%- include('partials/scripts') %>
 
     <script>
+
+        if (localStorage["urls"] === null) {
+            localStorage.setItem("urls", "[]");
+        }
+
+        // load previously shortened urls
+        document.addEventListener('readystatechange', () => {
+            if (document.readyState == 'complete') {
+                loadShortenedLinks();
+            };
+        });
+
         var form = document.getElementById('url-form');
+
+        // function for the custom submisson of the url-form
         form.addEventListener('submit', function (e) {
             e.preventDefault();
+
             var data = {};
             var formData = new FormData(form);
             for (var [key, value] of formData.entries()) {
                 data[key] = value;
-                console.log(key, value);
+                // console.log(key, value);
             }
             var original_url = data['url'];
+            toogleButtonState();
             fetch("/api/shorten-url", {
                 method: 'POST',
                 headers: {
@@ -73,21 +89,25 @@
             }).then((response) => {
                 if (!response.ok) {
                     response.text().then(text => {
-                        alert(text)
+                        alert(text);
                     });
                     throw Error(response.statusText);
                 }
                 return response;
             }).then((response) => {
-                response.json().then((json) => insertTableRow(original_url,json));
-                document.getElementById("url-form").reset();
-
+                response.json().then((json) => setTimeout(() => {
+                    insertTableRow(original_url, json);
+                    document.getElementById("url-form").reset();
+                }, 300));
             }).catch((error) => {
                 console.log(error);
+            }).finally(() => {
+                setTimeout(() => { toogleButtonState(); }, 300);
             });
         });
 
-        function insertTableRow(url,shortenedUrl){
+        // function to insert a url to the urls-table
+        function insertTableRow(url, shortenedUrl) {
             var tableBody = document.getElementById('urlsTableBody');
             var row_html = `
             <tr class="table-light">
@@ -95,9 +115,62 @@
                 <td>${window.location.href}${shortenedUrl}</td>
             </tr>
             `;
-            tableBody.insertAdjacentHTML("afterbegin",row_html);
+            tableBody.insertAdjacentHTML("afterbegin", row_html);
             document.getElementById("urlsTable").removeAttribute("hidden");
+            saveUrlInLocalStorage(url, shortenedUrl);
         }
+
+        // function to activate/deactivate spinner
+        function toogleButtonState() {
+            var btn = document.getElementById("submit-button");
+            var urlInput = document.getElementById("urlToShort");
+            var spinner = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...`;
+            if (btn.disabled) {
+                btn.disabled = false;
+                urlInput.disabled = false;
+                document.querySelector('#submit-button').innerHTML = 'Shorten';
+            }
+            else {
+                btn.disabled = true;
+                urlInput.disabled = true;
+                btn.innerHTML = spinner;
+            }
+
+        }
+
+        // localstorage
+
+        // clear local storage
+        document.getElementById("clearLocalStorage").addEventListener('click', event => {
+            localStorage['urls'] = "[]";
+            loadShortenedLinks();
+        });
+
+        // function to load local urls
+        function loadShortenedLinks() {
+
+            // console.log(localStorage["urls"]);
+            document.getElementById("urlsTableBody").innerHTML = "";
+            var urls = JSON.parse(localStorage["urls"]);
+            for (var i = 0; i < urls.length; i++) {
+                var url = urls[i];
+                insertTableRow(url.url, url.shortenedUrl);
+            }
+        }
+
+        // function to add a url to the localStorage
+        function saveUrlInLocalStorage(url, shortenedUrl) {
+            var obj = {
+                url: url,
+                shortenedUrl: shortenedUrl
+            };
+            var urls = JSON.parse(localStorage["urls"]);
+            urls.push(obj);
+            localStorage['urls'] = JSON.stringify(urls);
+        }
+
 
     </script>
 </body>

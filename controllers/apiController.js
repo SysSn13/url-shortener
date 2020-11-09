@@ -9,7 +9,6 @@ module.exports.shortenUrl = (req, res) => {
     }
     console.log(req.body.url);
     databaseController.insertUrl(req,res);
-    // res.status(200).json("given url is valid");
 }
 
 function validateUrlForm(body) {

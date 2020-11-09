@@ -102,7 +102,7 @@ function checkAndCreateTable() {
 }
 
 // function to insert a url to the urls table
-function insertUrl(req,req_res) {
+function insertUrl(req, req_res) {
     var url = req.body.url;
     var query = `
         insert into urls values (default,'${url}') RETURNING ID;
@@ -116,9 +116,9 @@ function insertUrl(req,req_res) {
                 if (shouldAbort(err, client, done)) return
                 client.query('COMMIT', err => {
                     if (err) {
-                        console.error('Error committing transaction', err.stack)
-                    } else{
-                        // console.log("url inserted!");
+                        console.error('Error committing transaction', err.stack);
+                        req_res.status(500).send("Internal server error");
+                    } else {
                         req_res.json(base62Controller.encode(res.rows[0].id));
                     }
                     done();
@@ -128,24 +128,24 @@ function insertUrl(req,req_res) {
     });
 }
 
-// function to get the url by ID
-function redirecthandler(req,req_res) {
+// function to get the url and redirect
+function redirecthandler(req, req_res) {
     var ID = base62Controller.decode(req.params.code);
     var query = `
         select URL from urls where ID=${ID};
     `;
-    pool.connect((err,client,done)=>{
-        if(err)
+    pool.connect((err, client, done) => {
+        if (err)
             throw err;
-        client.query(query,(err,res)=>{
-            if(err)
+        client.query(query, (err, res) => {
+            if (err)
                 throw error;
-            var urlExists = (res.rows.length==1);
-            if(urlExists){
+            var urlExists = (res.rows.length == 1);
+            if (urlExists) {
                 // console.log(res.rows[0]);
                 req_res.redirect(res.rows[0].url);
             }
-            else{
+            else {
                 console.log("url with given ID not found!");
                 req_res.status(404).render('404page');
             }
